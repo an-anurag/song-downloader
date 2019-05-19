@@ -28,5 +28,7 @@ if len(song_url_list[:-1]) == len(song_name_list[:-1]):
     i = 0
     while i < len(song_url_list):
         print(f'Downloading...{song_name_list[i]}')
-        request.urlretrieve(url=song_url_list[i], filename=song_name_list[i] + '.' + 'mp3')
+        response = requests.get(song_url_list[i])
+        mp3 = open(song_name_list[i] + '.' + 'mp3', 'wb')
+        mp3.write(response.content)
         i += 1
