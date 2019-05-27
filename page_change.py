@@ -11,13 +11,8 @@ import re
 
 def get_response(url):
 
-    # random integer to select user agent
     randomint = random.randint(0, 7)
 
-    # User_Agents
-    # This helps skirt a bit around servers that detect repeaded requests from the same machine.
-    # This will not prevent your IP from getting banned but will help a bit by pretending to be different browsers
-    # and operating systems.
     user_agents = [
         'Mozilla/5.0 (Windows; U; Windows NT 5.1; it; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11',
         'Opera/9.25 (Windows NT 5.1; U; en)',
@@ -84,8 +79,7 @@ if __name__ == '__main__':
         msg.attach(part2)
         server = smtplib.SMTP(host='smtp.gmail.com', port=587)
         server.starttls()
-        server.login(user='email', password='password')
-        
+        # server.login(user='email', password='password')
         server.sendmail(
             me, you, msg.as_string()
         )
