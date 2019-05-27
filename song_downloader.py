@@ -1,17 +1,13 @@
 import requests
 import random
 from bs4 import BeautifulSoup as Soup
+import re
 
 
 def get_response(url):
 
-    # random integer to select user agent
     randomint = random.randint(0, 7)
 
-    # User_Agents
-    # This helps skirt a bit around servers that detect repeaded requests from the same machine.
-    # This will not prevent your IP from getting banned but will help a bit by pretending to be different browsers
-    # and operating systems.
     user_agents = [
         'Mozilla/5.0 (Windows; U; Windows NT 5.1; it; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11',
         'Opera/9.25 (Windows NT 5.1; U; en)',
@@ -29,33 +25,20 @@ def get_response(url):
 
 if __name__ == '__main__':
 
-    url = "https://downloadming.cool/category/bollywood-mp3"
-    resp = get_response(url)
-    my_soup = Soup(resp.text, 'html.parser')
-    album_url_list = []
-    for li in my_soup.find("section", {'class': 'primary'}).find_all('li'):
-        anchor = li.find('a', href=True)['href']
-        album_url_list.append(anchor)
+    album_urls = [x for x in open('download_list.txt', 'r')]
 
-    # test with one url
-    top_album = album_url_list[0]
-    resp = get_response(top_album)
-    soup = Soup(resp.text, 'html.parser')
-    song_url_list = []
-    song_name_list = []
-    for i in soup.find('table').find_all('tr')[1:]:
-        song_name = str(i.find('td').text)[5:]
-        song_name_list.append(song_name)
-        song_url = i.contents[2].a['href']
-        song_url_list.append(song_url)
-        extension = str(song_url.split('.')[-1:])
-
-    # add support for ZIP file if it exist
-    if len(song_url_list[:-1]) == len(song_name_list[:-1]):
-        i = 0
-        while i < len(song_url_list):
-            print(f'Downloading...{song_name_list[i]}')
-            response = get_response(song_url_list[i])
-            mp3 = open(song_name_list[i] + '.' + 'mp3', 'wb')
-            mp3.write(response.content)
-            i += 1
+    for url in album_urls:
+        resp = get_response(url[:-1])
+        soup = Soup(resp.text, 'html.parser')
+        for a in soup.find_all('tr')[1:]:
+            td = a.find_all('td')[1:]
+            bit320 = str(td[1].a['href'])
+            extension = bit320.split('.')[-1:][0]
+            file_name = bit320.split('/')[-1:][0]
+            title_search = re.findall('[A-Z]+[a-z]+', file_name)
+            title_extract = [x for x in title_search if x != "Downloadming" and x != "Kbps"]
+            title = ' '.join(title_extract)
+            song = get_response(bit320)
+            print("Downloading... {}".format(title))
+            mp3 = open(title + '.' + extension, 'wb')
+            mp3.write(song.content)

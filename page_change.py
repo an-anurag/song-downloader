@@ -1,3 +1,4 @@
+import os
 import random
 import smtplib
 import requests
@@ -5,6 +6,7 @@ from bs4 import BeautifulSoup as Soup
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import re
 
 
 def get_response(url):
@@ -36,25 +38,28 @@ if __name__ == '__main__':
     url = "https://downloadming.cool/category/bollywood-mp3"
     resp = get_response(url)
     my_soup = Soup(resp.text, 'html.parser')
-    album_url_list = []
+    live_album_urls = []
     for li in my_soup.find("section", {'class': 'primary'}).find_all('li'):
         anchor = li.find('a', href=True)['href']
-        album_url_list.append(anchor)
-    # check last album count
-    read_file = open('album_count.txt', 'r')
-    lines = read_file.readlines()[-1:]
-    old_count = int(lines[0][-6:])
+        live_album_urls.append(anchor)
+
+    directory = os.path.dirname(os.path.abspath(__file__))
+    read_file = open(directory + '/album_records.txt', 'r')
+    last_line = read_file.readlines()[-1:]
+    pattern = re.compile("Top album:\s+\S+")
+    old_top_album = re.search(pattern, last_line[0])
+    old_top_album = old_top_album.group()
+    old_top_album = old_top_album[11:]
     read_file.close()
-    # check live album count
-    write_file = open('album_count.txt', 'a')
-    write_file.write(f"Date: {datetime.today()}, Top album: {album_url_list[0][26:]} Album count: {len(album_url_list)} \n")
-    write_file.close()
-    new_count = int(len(album_url_list)) + 1
-    write_file.close()
-    # if the album has been updated notify using mail
-    if old_count == new_count:
-        print("Not Changed")
-    else:  # If something has changed
+    updated_album_urls = []
+    search_old_top_album = [s for s in live_album_urls if old_top_album in s]
+    old_top_album_index = live_album_urls.index(search_old_top_album[0])
+    if not old_top_album_index == 0:
+        updated_album_urls.append(live_album_urls[:old_top_album_index])
+        download_list = open(directory + '/download_list.txt', 'w')
+        for album in updated_album_urls[0]:
+            album_info = "{}\n".format(album)
+            download_list.writelines(album_info)
         me = 'an.anuraag@gmail.com'
         you = 'an.anurag@live.in'
         msg = MIMEMultipart('alternative')
@@ -63,16 +68,16 @@ if __name__ == '__main__':
         msg['To'] = you
         # text = "Hi Anurag!\nIt seems Downloadming has been updated recently"
         html = """\
-        <html>
-          <head></head>
-          <body>
-            <h2>Hi Anurag!</h2><br>
-               <p>It seems <a href="https://downloadming.cool/category/bollywood-mp3">Downloadming</a> has been updated recently.</p>
-               <p>The new album added to the list</p>
-               <li>{}</li>
-          </body>
-        </html>
-        """.format(album_url_list[0][26:])
+                <html>
+                  <head></head>
+                  <body>
+                    <h2>Hi Anurag!</h2>
+                       <p>It seems <a href="https://downloadming.cool/category/bollywood-mp3">Downloadming</a> has been updated recently.</p>
+                       <p>The new album added to the list</p>
+                       {}{}{}
+                  </body>
+                </html>
+                """.format("<li>", [x for x in updated_album_urls[0]], "</li>")
         # part1 = MIMEText(text, 'plain')
         part2 = MIMEText(html, 'html')
         # msg.attach(part1)
@@ -80,7 +85,16 @@ if __name__ == '__main__':
         server = smtplib.SMTP(host='smtp.gmail.com', port=587)
         server.starttls()
         server.login(user='email', password='password')
+        
         server.sendmail(
             me, you, msg.as_string()
         )
         server.quit()
+        print("mail sent")
+    print(updated_album_urls)
+    write_file = open('album_records.txt', 'a')
+    write_file.write(f"Date: {datetime.today()}, Top album: {live_album_urls[0][26:]} Album count: {len(live_album_urls)} \n")
+    write_file.close()
+    new_count = int(len(live_album_urls))
+    write_file.close()
+
