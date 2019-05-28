@@ -12,7 +12,6 @@ import re
 def get_response(url):
 
     randomint = random.randint(0, 7)
-
     user_agents = [
         'Mozilla/5.0 (Windows; U; Windows NT 5.1; it; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11',
         'Opera/9.25 (Windows NT 5.1; U; en)',
@@ -80,6 +79,7 @@ if __name__ == '__main__':
         server = smtplib.SMTP(host='smtp.gmail.com', port=587)
         server.starttls()
         # server.login(user='email', password='password')
+        server.login(user='an.anuraag@gmail.com', password='3UnTy!3###3')
         server.sendmail(
             me, you, msg.as_string()
         )
@@ -91,4 +91,3 @@ if __name__ == '__main__':
     write_file.close()
     new_count = int(len(live_album_urls))
     write_file.close()
-

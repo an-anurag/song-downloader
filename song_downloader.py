@@ -1,5 +1,5 @@
-from bs4 import BeautifulSoup as Soup
 import re
+from bs4 import BeautifulSoup as Soup
 from page_change import get_response
 
 if __name__ == '__main__':
