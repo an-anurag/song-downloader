@@ -78,8 +78,8 @@ if __name__ == '__main__':
         msg.attach(part2)
         server = smtplib.SMTP(host='smtp.gmail.com', port=587)
         server.starttls()
-        # server.login(user='email', password='password')
-        server.login(user='an.anuraag@gmail.com', password='3UnTy!3###3')
+        server.login(user='email', password='password')
+        
         server.sendmail(
             me, you, msg.as_string()
         )
