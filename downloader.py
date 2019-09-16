@@ -85,3 +85,6 @@ if __name__ == '__main__':
     dl_list = sd.get_album_link(soup)
     sd.write_dl_list(dl_list)
     sd.download_album()
+    # TODO: handle repeated downloading of same album
+    # TODO: clear completed download list
+    # TODO: if zip album found download it and extract it dont download the tracks
