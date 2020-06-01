@@ -8,3 +8,37 @@ user_agents = [
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.6; rv:8.0.1) Gecko/20100101 Firefox/8.0.1',
         'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.151 Safari/535.19'
     ]
+
+
+# -*- coding: utf-8 -*-
+"""
+Global variables for project level configuration
+Created on 10/9/2019
+@author: Anurag
+"""
+
+# imports
+import os
+
+from configparser import RawConfigParser
+
+
+class ConfigReader:
+    """
+    A class to implement custom cfg file reader
+    """
+
+    def __init__(self):
+        self.cfg_file = os.path.join(os.path.dirname(os.path.dirname(__file__)) + '/setup.cfg')
+        self._config = RawConfigParser()
+        self._config.read(self.cfg_file)
+
+    def read(self, section, key):
+        """
+        A read method to read key and values
+        :return:
+        """
+        return self._config.get(section, key)
+
+
+conf = ConfigReader()
